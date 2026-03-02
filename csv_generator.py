@@ -1,16 +1,11 @@
-'''
-Created on 19 de jan. de 2026
-
-@author: Julio
-'''
-
 import csv
 import math
 
-factor = 1000
-divisor = '\t'
+
 
 def main():
+    factor = 2000
+    divisor = '\t'
     with open('wave.txt', 'w', newline='') as csvfile_w:
         sinwriter = csv.writer(csvfile_w, delimiter='d', quotechar='q', quoting=csv.QUOTE_NONE, escapechar='e')
         for i in range(factor+1):
@@ -23,10 +18,10 @@ def main():
             
             value_string = truncate(value_x)
             value_string = value_string + divisor + truncate(value_y)
-            value_string = value_string +  divisor + truncate(value_z)
-            value_string = value_string +  divisor + truncate(value_u)
-            value_string = value_string +  divisor + truncate(value_v)
-            value_string = value_string +  divisor + truncate(value_w)
+            value_string = value_string + divisor + truncate(value_z)
+            value_string = value_string + divisor + truncate(value_u)
+            value_string = value_string + divisor + truncate(value_v)
+            value_string = value_string + divisor + truncate(value_w)
             sinwriter.writerow([value_string])
 
     print('wave.txt created!')

@@ -7,7 +7,7 @@ def fetch(entries):
         field = entry[0]
         values  = entry[1].get()
         print('%s: "%s"' % (field, values))
-        return(values)
+    return(values)
 
 def makeform(root, fields):
     entries = []
@@ -23,6 +23,8 @@ def makeform(root, fields):
 
 if __name__ == '__main__':
     root = tk.Tk()
+    root.title("Configurações")
+    root.geometry("200x250")
     ents = makeform(root, fields)
     root.bind('<Return>', (lambda event, e=ents: fetch(e)))   
     b1 = tk.Button(root, text='Show',
@@ -32,3 +34,6 @@ if __name__ == '__main__':
     b2.pack(side=tk.LEFT, padx=5, pady=5)
     root.mainloop()
     
+    my_int_var = tk.IntVar(root, value=100)
+    
+    print(ents[1])
