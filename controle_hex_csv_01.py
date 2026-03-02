@@ -12,40 +12,44 @@ def truncate(number):
     return truncated_number
 
 
-x_a = 0; x_f = 1
-y_a = 0; y_f = 1
-z_a = 0; z_f = 1
-u_a = 0; u_f = 1
-v_a = 0; v_f = 1
-w_a = 0; w_f = 1
+x_a = 0.0; x_f = 1
+y_a = 0.0; y_f = 1
+z_a = 2.0; z_f = 1
+u_a = 0.0; u_f = 1
+v_a = 0.0; v_f = 1
+w_a = 1.0; w_f = 1
 
-def on_button_click_values():
-    x_a = entry_widget_x_amp.get()
-    x_f = entry_widget_x_freq.get()
-    y_a = entry_widget_y_amp.get()
-    y_f = entry_widget_y_freq.get()
-    z_a = entry_widget_z_amp.get()
-    z_f = entry_widget_z_freq.get()
-    u_a = entry_widget_u_amp.get()
-    u_f = entry_widget_u_freq.get()
-    v_a = entry_widget_v_amp.get()
-    v_f = entry_widget_v_freq.get()
-    w_a = entry_widget_w_amp.get()
-    w_f = entry_widget_w_freq.get()
-    print("valuesa assigned to variables!")
+def on_button_click_values(x_a_b, x_f_b, y_a_b, y_f_b, z_a_b, z_f_b, u_a_b, u_f_b, v_a_b, v_f_b, w_a_b, w_f_b):
+    print("assigning value to variables!")
+    x_a_b = entry_widget_x_amp.get()
+    x_f_b = entry_widget_x_freq.get()
+    y_a_b = entry_widget_y_amp.get()
+    y_f_b = entry_widget_y_freq.get()
+    z_a_b = entry_widget_z_amp.get()
+    z_f_b = entry_widget_z_freq.get()
+    u_a_b = entry_widget_u_amp.get()
+    u_f_b = entry_widget_u_freq.get()
+    v_a_b = entry_widget_v_amp.get()
+    v_f_b = entry_widget_v_freq.get()
+    w_a_b = entry_widget_w_amp.get()
+    w_f_b = entry_widget_w_freq.get()
+    print("parameters:", x_a_b, x_f_b, y_a_b, y_f_b, z_a_b, z_f_b, u_a_b, u_f_b, v_a_b, v_f_b, w_a_b, w_f_b)
+    print("values assigned to variables!")
 
-def on_button_click_csv_generate(x_a, x_f, y_a, y_f, z_a, z_f, u_a, u_f, v_a, v_f, w_a, w_f):
+def on_button_click_csv_generate(x_a_c, x_f_c, y_a_c, y_f_c, z_a_c, z_f_c, u_a_c, u_f_c, v_a_c, v_f_c, w_a_c, w_f_c):
     factor = 2000
     divisor = '\t'
+    print('creating wave.txt!')
+    print("parameters:", x_a_c, x_f_c, y_a_c, y_f_c, z_a_c, z_f_c, u_a_c, u_f_c, v_a_c, v_f_c, w_a_c, w_f_c)
     with open('wave.txt', 'w', newline='') as csvfile_w:
         sinwriter = csv.writer(csvfile_w, delimiter='d', quotechar='q', quoting=csv.QUOTE_NONE, escapechar='e')
         for i in range(factor+1):
-            value_x = x_a*math.sin(math.pi*i/(factor/x_f))
-            value_y = y_a*math.sin(math.pi*i/(factor/y_f))
-            value_z = z_a*math.sin(math.pi*i/(factor/z_f))
-            value_u = u_a*math.sin(math.pi*i/(factor/u_f))
-            value_v = v_a*math.sin(math.pi*i/(factor/v_f))
-            value_w = w_a*math.sin(math.pi*i/(factor/w_f))
+            value_x = x_a_c*math.sin(math.pi*i/(factor/x_f_c))
+            value_y = y_a_c*math.sin(math.pi*i/(factor/y_f_c))
+            value_z = z_a_c*math.sin(math.pi*i/(factor/z_f_c))
+            value_u = u_a_c*math.sin(math.pi*i/(factor/u_f_c))
+            value_v = v_a_c*math.sin(math.pi*i/(factor/v_f_c))
+            value_w = w_a_c*math.sin(math.pi*i/(factor/w_f_c))
             
             value_string = truncate(value_x)
             value_string = value_string + divisor + truncate(value_y)
@@ -54,7 +58,6 @@ def on_button_click_csv_generate(x_a, x_f, y_a, y_f, z_a, z_f, u_a, u_f, v_a, v_
             value_string = value_string + divisor + truncate(value_v)
             value_string = value_string + divisor + truncate(value_w)
             sinwriter.writerow([value_string])
-
     print('wave.txt created!')
 
 root = tk.Tk()
@@ -133,7 +136,7 @@ w_freq = tk.IntVar()
 entry_widget_w_freq = tk.Entry(root, textvariable=w_freq)
 entry_widget_w_freq.grid(row=w_position[0]+1,column=w_position[1])
     
-button_values = tk.Button(root, text="Get Value", command=on_button_click_values)
+button_values = tk.Button(root, text="Get Value", command=lambda: on_button_click_values(x_a, x_f, y_a, y_f, z_a, z_f, u_a, u_f, v_a, v_f, w_a, w_f))
 button_values.grid(row=0,column=1)
 button_csv = tk.Button(root, text="Get CSV", command=lambda: on_button_click_csv_generate(x_a, x_f, y_a, y_f, z_a, z_f, u_a, u_f, v_a, v_f, w_a, w_f))
 button_csv.grid(row=0,column=2)
