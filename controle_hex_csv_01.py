@@ -18,6 +18,7 @@ v_a = 0.0; v_f = 1
 w_a = 0.0; w_f = 1
 
 resolution = 2
+default_mult_size = 1000
 
 g_velocity = 10
 g_num_cycles = 4
@@ -56,7 +57,9 @@ def on_button_click_csv_generate(x_a_c, x_f_c, y_a_c, y_f_c, z_a_c, z_f_c, u_a_c
     except Exception as e:
         print("certifique-se de que todos os campos estão preenchidos corretamente.")
         return
-    mult_size = 1000
+    
+    mult_size = x_mult_size.get()
+    # mult_size = 250
     factor = x_factor.get()
     points = mult_size * factor
     
@@ -138,10 +141,6 @@ def runwavegen(pidevice, NUMCYLES, TABLERATE):
     # wavegens = range(1, len(wavedata) + 1)
     wavegens = (1, 2, 3, 4, 5, 6)
     wavetables = (1, 2, 3, 4, 5, 6)
-        
-    if pidevice.HasWCL():  # you can remove this code block if your controller does not support WCL()
-        print('clear wave tables {}'.format(wavetables))
-        pidevice.WCL(wavetables)
     
     if pidevice.HasWSL():  # you can remove this code block if your controller does not support WSL()
         print('\nconnect wave tables {} to wave generators {}'.format(wavetables, wavegens))
@@ -154,6 +153,10 @@ def runwavegen(pidevice, NUMCYLES, TABLERATE):
     if pidevice.HasWTR():  # you can remove this code block if your controller does not support WTR()
         print('\nset wave table rate to {} for wave generators {}\n'.format(TABLERATE, wavegens))
         pidevice.WTR(wavegens, [TABLERATE] * len(wavegens), interpol=[0] * len(wavegens))
+        
+    if pidevice.HasWCL():  # you can remove this code block if your controller does not support WCL()
+        print('clear wave tables {}'.format(wavetables))
+        pidevice.WCL(wavetables)
     
     for i, wavetable in enumerate(wavetables):
         print('write wave points of wave table {} and axis {}'.format(wavetable, axes[i]))
@@ -180,6 +183,7 @@ def runwavegen(pidevice, NUMCYLES, TABLERATE):
 #     pidevice.VLS(VELOCITY)
 
 def execute(pidevice, VELOCITY, NUMCYLES, TABLERATE):
+    on_button_click_csv_generate(x_a, x_f, y_a, y_f, z_a, z_f, u_a, u_f, v_a, v_f, w_a, w_f)
     VELOCITY = vel.get()
     NUMCYLES = num_cycles.get()
     TABLERATE = table_rate.get()
@@ -204,6 +208,11 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     x_factor.set(resolution)
     entry_widget_x_factor = tk.Entry(root, textvariable=x_factor)
     entry_widget_x_factor.grid(row=0,column=0)
+    
+    x_mult_size = tk.IntVar()
+    x_mult_size.set(default_mult_size)
+    entry_widget_x_mult_size = tk.Entry(root, textvariable=x_mult_size)
+    entry_widget_x_mult_size.grid(row=0,column=1)
     
     # --------------------------------------------------------------------------
     # eixos cartesianos
@@ -306,15 +315,15 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     
     # --------------------------------------------------------------------------
     # botões
-    button_csv = tk.Button(root,text="Get Table", command=lambda: on_button_click_csv_generate(
-        x_a, x_f,
-        y_a, y_f,
-        z_a, z_f,
-        u_a, u_f,
-        v_a, v_f,
-        w_a, w_f)
-    )
-    button_csv.grid(row=0,column=1)
+    # button_csv = tk.Button(root,text="Get Table", command=lambda: on_button_click_csv_generate(
+    #     x_a, x_f,
+    #     y_a, y_f,
+    #     z_a, z_f,
+    #     u_a, u_f,
+    #     v_a, v_f,
+    #     w_a, w_f)
+    # )
+    # button_csv.grid(row=0,column=1)
     
     button_send_wave = tk.Button(root, text="Send Wave", command=lambda: execute(
         pidevice,
@@ -330,4 +339,3 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     root.protocol("WM_DELETE_WINDOW", on_closing)
     
     root.mainloop()
-
