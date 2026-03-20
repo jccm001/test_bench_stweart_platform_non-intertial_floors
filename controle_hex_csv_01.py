@@ -17,6 +17,8 @@ u_a = 0.0; u_f = 1
 v_a = 0.0; v_f = 1
 w_a = 0.0; w_f = 1
 
+runs = 0
+
 resolution = 2
 default_mult_size = 1000
 
@@ -131,7 +133,7 @@ def runwavegen(pidevice, NUMCYLES, TABLERATE):
     """Read wave data, set up wave generator and run them.
     @type pidevice : pipython.gcscommands.GCSCommands
     """
-    
+    global runs
     
     wavedata = readwavedata()
     axes = pidevice.axes[:len(wavedata)]
@@ -141,15 +143,21 @@ def runwavegen(pidevice, NUMCYLES, TABLERATE):
     # wavegens = range(1, len(wavedata) + 1)
     wavegens = (1, 2, 3, 4, 5, 6)
     wavetables = (1, 2, 3, 4, 5, 6)
+
+    if(runs == 0):
+        for i, wavetable in enumerate(wavetables):
+            print('write wave points of wave table {} and axis {}'.format(wavetable, axes[i]))
+            pitools.writewavepoints(pidevice, wavetable, wavedata[i], bunchsize=10)
+            runs = runs+1
     
     if pidevice.HasWSL():  # you can remove this code block if your controller does not support WSL()
         print('\nconnect wave tables {} to wave generators {}'.format(wavetables, wavegens))
         pidevice.WSL(wavegens, wavetables)
-    #
+
     if pidevice.HasWGC():  # you can remove this code block if your controller does not support WGC()
         print('\nset wave generators {} to run for {} cycles'.format(wavegens, NUMCYLES))
         pidevice.WGC(wavegens, [NUMCYLES] * len(wavegens))
-    #
+
     if pidevice.HasWTR():  # you can remove this code block if your controller does not support WTR()
         print('\nset wave table rate to {} for wave generators {}\n'.format(TABLERATE, wavegens))
         pidevice.WTR(wavegens, [TABLERATE] * len(wavegens), interpol=[0] * len(wavegens))
@@ -157,10 +165,10 @@ def runwavegen(pidevice, NUMCYLES, TABLERATE):
     if pidevice.HasWCL():  # you can remove this code block if your controller does not support WCL()
         print('clear wave tables {}'.format(wavetables))
         pidevice.WCL(wavetables)
-    
+
     for i, wavetable in enumerate(wavetables):
         print('write wave points of wave table {} and axis {}'.format(wavetable, axes[i]))
-        pitools.writewavepoints(pidevice, wavetable, wavedata[i], bunchsize=10)
+        pitools.writewavepoints(pidevice, wavetable, wavedata[i], bunchsize=10) 
         
     startpos = [wavedata[i][0] for i in range(len(wavedata))]
     print('\nmove axes {} to start positions \n{}'.format(axes, startpos))
@@ -193,7 +201,9 @@ def execute(pidevice, VELOCITY, NUMCYLES, TABLERATE):
     
 
 with GCSDevice(CONTROLLERNAME) as pidevice:
-    pidevice.ConnectRS232(comport=3, baudrate=115200)
+#    pidevice.ConnectRS232(comport=3, baudrate=115200)
+    pidevice.ConnectTCPIP(ipaddress='169.254.69.190')
+#    pidevice.InterfaceSetupDlg()
     print('connected: %s' % pidevice.qIDN().strip())
     print('initialize connected stages...')
     pitools.startup(pidevice, stages=STAGES, refmodes=REFMODES)
