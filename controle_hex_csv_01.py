@@ -201,8 +201,8 @@ def execute(pidevice, VELOCITY, NUMCYLES, TABLERATE):
     
 
 with GCSDevice(CONTROLLERNAME) as pidevice:
-#    pidevice.ConnectRS232(comport=3, baudrate=115200)
-    pidevice.ConnectTCPIP(ipaddress='169.254.69.190')
+    pidevice.ConnectRS232(comport=3, baudrate=115200)
+    # pidevice.ConnectTCPIP(ipaddress='169.254.69.190')
 #    pidevice.InterfaceSetupDlg()
     print('connected: %s' % pidevice.qIDN().strip())
     print('initialize connected stages...')
@@ -228,7 +228,7 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     # eixos cartesianos
     
     # parametros x
-    tk.Label(root, text="X").grid(row=x_position[0]-1, column=x_position[1])
+    tk.Label(root, text="X (mm, Hz)").grid(row=x_position[0]-1, column=x_position[1])
     x_amplitude = tk.DoubleVar()
     entry_widget_x_amp = tk.Entry(root, textvariable=x_amplitude)
     entry_widget_x_amp.grid(row=x_position[0],column=x_position[1])
@@ -239,7 +239,7 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     entry_widget_x_freq.grid(row=x_position[0]+1,column=x_position[1])
     
     # parametros y
-    tk.Label(root, text="Y").grid(row=y_position[0]-1, column=y_position[1])
+    tk.Label(root, text="Y (mm, Hz)").grid(row=y_position[0]-1, column=y_position[1])
     y_amplitude = tk.DoubleVar()
     entry_widget_y_amp = tk.Entry(root, textvariable=y_amplitude)
     entry_widget_y_amp.grid(row=y_position[0],column=y_position[1])
@@ -250,7 +250,7 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     entry_widget_y_freq.grid(row=y_position[0]+1,column=y_position[1])
     
     # parametros z
-    tk.Label(root, text="Z").grid(row=z_position[0]-1, column=z_position[1])
+    tk.Label(root, text="Z (mm, Hz)").grid(row=z_position[0]-1, column=z_position[1])
     z_amplitude = tk.DoubleVar()
     entry_widget_z_amp = tk.Entry(root, textvariable=z_amplitude)
     entry_widget_z_amp.grid(row=z_position[0],column=z_position[1])
@@ -264,7 +264,7 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     # angulos
     
     # parametros u
-    tk.Label(root, text="U").grid(row=u_position[0]-1, column=u_position[1])
+    tk.Label(root, text="U (deg, Hz)").grid(row=u_position[0]-1, column=u_position[1])
     u_amplitude = tk.DoubleVar()
     entry_widget_u_amp = tk.Entry(root, textvariable=u_amplitude)
     entry_widget_u_amp.grid(row=u_position[0],column=u_position[1])
@@ -275,7 +275,7 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     entry_widget_u_freq.grid(row=u_position[0]+1,column=u_position[1])
     
     # parametros v
-    tk.Label(root, text="V").grid(row=v_position[0]-1, column=v_position[1])
+    tk.Label(root, text="V (deg, Hz)").grid(row=v_position[0]-1, column=v_position[1])
     v_amplitude = tk.DoubleVar()
     entry_widget_v_amp = tk.Entry(root, textvariable=v_amplitude)
     entry_widget_v_amp.grid(row=v_position[0],column=v_position[1])
@@ -286,7 +286,7 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     entry_widget_v_freq.grid(row=v_position[0]+1,column=v_position[1])
     
     # parametros w
-    tk.Label(root, text="W").grid(row=w_position[0]-1, column=w_position[1])
+    tk.Label(root, text="W (deg, Hz)").grid(row=w_position[0]-1, column=w_position[1])
     w_amplitude = tk.DoubleVar()
     entry_widget_w_amp = tk.Entry(root, textvariable=w_amplitude)
     entry_widget_w_amp.grid(row=w_position[0],column=w_position[1])
