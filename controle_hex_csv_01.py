@@ -22,17 +22,25 @@ runs = 0
 resolution = 2
 default_mult_size = 1000
 
-g_velocity = 10
+g_velocity = 25
 g_num_cycles = 4
 g_table_rate = 10
 
 # elements positions (rows, columns)
-x_position = [2, 0]
-y_position = [2, 1]
-z_position = [2, 2]
-u_position = [5, 0]
-v_position = [5, 1]
-w_position = [5, 2]
+# x_position = [2, 0]
+# y_position = [2, 1]
+# z_position = [2, 2]
+# u_position = [5, 0]
+# v_position = [5, 1]
+# w_position = [5, 2]
+
+axis_start = 5
+x_position = [axis_start, 0]
+y_position = [axis_start+1, 0]
+z_position = [axis_start+2, 0]
+u_position = [axis_start+3, 0]
+v_position = [axis_start+4, 0]
+w_position = [axis_start+5, 0]
 
 velocity_position = [8, 0]
 num_cycles_position = [8, 1]
@@ -53,9 +61,7 @@ def on_button_click_csv_generate(x_a_c, x_f_c, y_a_c, y_f_c, z_a_c, z_f_c, u_a_c
         u_a_c = u_amplitude.get(); u_f_c = u_freq.get()
         v_a_c = v_amplitude.get(); v_f_c = v_freq.get()
         w_a_c = w_amplitude.get(); w_f_c = w_freq.get()
-        g_velocity = vel.get()
         g_num_cycles = num_cycles.get()
-        g_table_rate = table_rate.get()
     except Exception as e:
         print("certifique-se de que todos os campos estão preenchidos corretamente.")
         return
@@ -104,12 +110,8 @@ def on_button_click_csv_generate(x_a_c, x_f_c, y_a_c, y_f_c, z_a_c, z_f_c, u_a_c
             else:
                 value_w = w_a_c*math.cos(2*math.pi*i*w_f_c/(points/factor))
             
-            value_string = truncate(value_x)
-            value_string = value_string + divisor + truncate(value_y)
-            value_string = value_string + divisor + truncate(value_z)
-            value_string = value_string + divisor + truncate(value_u)
-            value_string = value_string + divisor + truncate(value_v)
-            value_string = value_string + divisor + truncate(value_w)
+            value_string =                truncate(value_x) + divisor + truncate(value_y) + divisor + truncate(value_z) + divisor
+            value_string = value_string + truncate(value_u) + divisor + truncate(value_v) + divisor + truncate(value_w)
             sinwriter.writerow([value_string])
     print('\nwave.txt created!')
 
@@ -129,7 +131,7 @@ def readwavedata():
                 data[i].append(item)
     return data
 
-def runwavegen(pidevice, NUMCYLES, TABLERATE):
+def definetable(pidevice, NUMCYLES, TABLERATE):
     """Read wave data, set up wave generator and run them.
     @type pidevice : pipython.gcscommands.GCSCommands
     """
@@ -169,7 +171,16 @@ def runwavegen(pidevice, NUMCYLES, TABLERATE):
     for i, wavetable in enumerate(wavetables):
         print('write wave points of wave table {} and axis {}'.format(wavetable, axes[i]))
         pitools.writewavepoints(pidevice, wavetable, wavedata[i], bunchsize=10) 
-        
+    
+def runwave(pidevice, NUMCYLES, TABLERATE):
+    
+    wavedata = readwavedata()
+    axes = pidevice.axes[:len(wavedata)]
+    assert len(wavedata) == len(axes), 'this sample requires {} connected axes'.format(len(wavedata))
+    
+    wavegens = (1, 2, 3, 4, 5, 6)
+    wavetables = (1, 2, 3, 4, 5, 6)
+    
     startpos = [wavedata[i][0] for i in range(len(wavedata))]
     print('\nmove axes {} to start positions \n{}'.format(axes, startpos))
     pidevice.MOV(axes, startpos)
@@ -187,8 +198,6 @@ def runwavegen(pidevice, NUMCYLES, TABLERATE):
     print('\ndone')
     print('\n-------------------------------------------------------------------------------------------')
 
-# def set_velocity(pidevice, VELOCITY):
-#     pidevice.VLS(VELOCITY)
 
 def execute(pidevice, VELOCITY, NUMCYLES, TABLERATE):
     on_button_click_csv_generate(x_a, x_f, y_a, y_f, z_a, z_f, u_a, u_f, v_a, v_f, w_a, w_f)
@@ -197,7 +206,8 @@ def execute(pidevice, VELOCITY, NUMCYLES, TABLERATE):
     TABLERATE = table_rate.get()
     
     pidevice.VLS(VELOCITY)
-    runwavegen(pidevice, NUMCYLES, TABLERATE)
+    definetable(pidevice, NUMCYLES, TABLERATE)
+    runwave(pidevice, NUMCYLES, TABLERATE)
     
 
 with GCSDevice(CONTROLLERNAME) as pidevice:
@@ -211,7 +221,6 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     root = tk.Tk()
     root.title("Parâmetros de Ajuste")
     root.geometry("400x200")
-    # label = tk.Label(root, text="Parâmetros de Ajuste").grid(row=0,column=0)
     
     
     x_factor = tk.IntVar()
@@ -228,84 +237,85 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     # eixos cartesianos
     
     # parametros x
-    tk.Label(root, text="X (mm, Hz)").grid(row=x_position[0]-1, column=x_position[1])
+    tk.Label(root, text="X (mm, Hz)").grid(row=x_position[0], column=x_position[1])
     x_amplitude = tk.DoubleVar()
     entry_widget_x_amp = tk.Entry(root, textvariable=x_amplitude)
-    entry_widget_x_amp.grid(row=x_position[0],column=x_position[1])
+    entry_widget_x_amp.grid(row=x_position[0],column=x_position[1]+1)
     
     x_freq = tk.IntVar()
     x_freq.set(x_f)
     entry_widget_x_freq = tk.Entry(root, textvariable=x_freq)
-    entry_widget_x_freq.grid(row=x_position[0]+1,column=x_position[1])
+    entry_widget_x_freq.grid(row=x_position[0],column=x_position[1]+2)
     
     # parametros y
-    tk.Label(root, text="Y (mm, Hz)").grid(row=y_position[0]-1, column=y_position[1])
+    tk.Label(root, text="Y (mm, Hz)").grid(row=y_position[0], column=y_position[1])
     y_amplitude = tk.DoubleVar()
     entry_widget_y_amp = tk.Entry(root, textvariable=y_amplitude)
-    entry_widget_y_amp.grid(row=y_position[0],column=y_position[1])
+    entry_widget_y_amp.grid(row=y_position[0],column=y_position[1]+1)
     
     y_freq = tk.IntVar()
     y_freq.set(y_f)
     entry_widget_y_freq = tk.Entry(root, textvariable=y_freq)
-    entry_widget_y_freq.grid(row=y_position[0]+1,column=y_position[1])
+    entry_widget_y_freq.grid(row=y_position[0],column=y_position[1]+2)
     
     # parametros z
-    tk.Label(root, text="Z (mm, Hz)").grid(row=z_position[0]-1, column=z_position[1])
+    tk.Label(root, text="Z (mm, Hz)").grid(row=z_position[0], column=z_position[1])
     z_amplitude = tk.DoubleVar()
     entry_widget_z_amp = tk.Entry(root, textvariable=z_amplitude)
-    entry_widget_z_amp.grid(row=z_position[0],column=z_position[1])
+    entry_widget_z_amp.grid(row=z_position[0],column=z_position[1]+1)
     
     z_freq = tk.IntVar()
     z_freq.set(z_f)
     entry_widget_z_freq = tk.Entry(root, textvariable=z_freq)
-    entry_widget_z_freq.grid(row=z_position[0]+1,column=z_position[1])
+    entry_widget_z_freq.grid(row=z_position[0],column=z_position[1]+2)
     
     # --------------------------------------------------------------------------
     # angulos
     
     # parametros u
-    tk.Label(root, text="U (deg, Hz)").grid(row=u_position[0]-1, column=u_position[1])
+    tk.Label(root, text="U (deg, Hz)").grid(row=u_position[0], column=u_position[1])
     u_amplitude = tk.DoubleVar()
     entry_widget_u_amp = tk.Entry(root, textvariable=u_amplitude)
-    entry_widget_u_amp.grid(row=u_position[0],column=u_position[1])
+    entry_widget_u_amp.grid(row=u_position[0],column=u_position[1]+1)
     
     u_freq = tk.IntVar()
     u_freq.set(u_f)
     entry_widget_u_freq = tk.Entry(root, textvariable=u_freq)
-    entry_widget_u_freq.grid(row=u_position[0]+1,column=u_position[1])
+    entry_widget_u_freq.grid(row=u_position[0],column=u_position[1]+2)
     
     # parametros v
-    tk.Label(root, text="V (deg, Hz)").grid(row=v_position[0]-1, column=v_position[1])
+    tk.Label(root, text="V (deg, Hz)").grid(row=v_position[0], column=v_position[1])
     v_amplitude = tk.DoubleVar()
     entry_widget_v_amp = tk.Entry(root, textvariable=v_amplitude)
-    entry_widget_v_amp.grid(row=v_position[0],column=v_position[1])
+    entry_widget_v_amp.grid(row=v_position[0],column=v_position[1]+1)
     
     v_freq = tk.IntVar()
     v_freq.set(v_f)
     entry_widget_v_freq = tk.Entry(root, textvariable=v_freq)
-    entry_widget_v_freq.grid(row=v_position[0]+1,column=v_position[1])
+    entry_widget_v_freq.grid(row=v_position[0],column=v_position[1]+2)
     
     # parametros w
-    tk.Label(root, text="W (deg, Hz)").grid(row=w_position[0]-1, column=w_position[1])
+    tk.Label(root, text="W (deg, Hz)").grid(row=w_position[0], column=w_position[1])
     w_amplitude = tk.DoubleVar()
     entry_widget_w_amp = tk.Entry(root, textvariable=w_amplitude)
-    entry_widget_w_amp.grid(row=w_position[0],column=w_position[1])
+    entry_widget_w_amp.grid(row=w_position[0],column=w_position[1]+1)
     
     w_freq = tk.IntVar()
     w_freq.set(w_f)
     entry_widget_w_freq = tk.Entry(root, textvariable=w_freq)
-    entry_widget_w_freq.grid(row=w_position[0]+1,column=w_position[1])
+    entry_widget_w_freq.grid(row=w_position[0],column=w_position[1]+2)
     
     # --------------------------------------------------------------------------
     # parametros do hexapode
     
-    # velocidade de deslocamento
-    tk.Label(root, text="Velocity").grid(row=velocity_position[0]-1, column=velocity_position[1])
-    vel = tk.DoubleVar()
-    vel.set(g_velocity)
-    entry_widget_vel = tk.Entry(root, textvariable=vel)
-    entry_widget_vel.grid(row=velocity_position[0]+1,column=velocity_position[1])
+    # # velocidade de deslocamento
+    # tk.Label(root, text="Velocity").grid(row=velocity_position[0]-1, column=velocity_position[1])
+    # vel = tk.DoubleVar()
+    # vel.set(g_velocity)
+    # entry_widget_vel = tk.Entry(root, textvariable=vel)
+    # entry_widget_vel.grid(row=velocity_position[0]+1,column=velocity_position[1])
     
+
     
     # numero de repetições
     tk.Label(root, text="Cycles").grid(row=num_cycles_position[0]-1, column=num_cycles_position[1])
@@ -315,13 +325,13 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     entry_widget_num_cycles.grid(row=num_cycles_position[0]+1,column=num_cycles_position[1])
     
     
-    # duracao dos ciclos
-    # "duration of a wave table point in multiples of servo cycle times as integer"
-    tk.Label(root, text="Rate").grid(row=table_rate_position[0]-1, column=table_rate_position[1])
-    table_rate = tk.IntVar()
-    table_rate.set(g_table_rate)
-    entry_widget_table_rate = tk.Entry(root, textvariable=table_rate)
-    entry_widget_table_rate.grid(row=table_rate_position[0]+1,column=table_rate_position[1])
+    # # duracao dos ciclos
+    # # "duration of a wave table point in multiples of servo cycle times as integer"
+    # tk.Label(root, text="Rate").grid(row=table_rate_position[0]-1, column=table_rate_position[1])
+    # table_rate = tk.IntVar()
+    # table_rate.set(g_table_rate)
+    # entry_widget_table_rate = tk.Entry(root, textvariable=table_rate)
+    # entry_widget_table_rate.grid(row=table_rate_position[0]+1,column=table_rate_position[1])
     
     # --------------------------------------------------------------------------
     # botões
@@ -335,12 +345,13 @@ with GCSDevice(CONTROLLERNAME) as pidevice:
     # )
     # button_csv.grid(row=0,column=1)
     
-    button_send_wave = tk.Button(root, text="Send Wave", command=lambda: execute(
+    button_build_wave = tk.Button(root, text="Send Wave", command=lambda: execute(
         pidevice,
         g_velocity,
         g_num_cycles,
         g_table_rate))
-    button_send_wave.grid(row=0,column=2)
+    button_build_wave.grid(row=0,column=2)
+    
     
     def on_closing():
         pidevice.CloseConnection()
